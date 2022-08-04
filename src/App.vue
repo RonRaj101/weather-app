@@ -3,21 +3,19 @@
   <h1>Weather App</h1>
   <div class="weather">
     <div class="search">
-      <input v-model="query" @keypress.enter="getWeather" placeholder="Enter City Name" name="" id="searchbox">
-      
+      <input v-model="query" @keypress.enter="getWeather" placeholder="Enter City Name" name="" id="searchbox" required>
     </div>
 
-    <div :class="parseInt(main.temp) > 20 ? 'hot' : 'cold'" class="result">
-      <div v-if="Object.keys(wData).length > 0">
-        <h1>{{ wData.name }}, {{ sys.country }}</h1>
-        <h1 class="temp">{{ Math.round(parseInt(main.temp)).toString() }}&#8451;</h1>
-        <h2 style="text-transform:capitalize ;">{{ weather.description }}</h2>
-      </div>
-      <div v-else>
-        <h1>Search for a country/city/territory & ENTER</h1>
+    <div v-if="objState && typeof wData != 'undefined'">
+      <div class="result" :class=" parseInt(wData.main.temp) > 20 ? 'hot' : 'cold' " >
+        <h1>{{ wData.name }}, {{ wData.sys.country }}</h1>
+        <h1 class="temp">{{ Math.round(parseInt(wData.main.temp)).toString() }}&#8451;</h1>
+        <h2 style="text-transform:capitalize ;">{{ wData.weather[0].description }}</h2>
       </div>
     </div>
-    
+    <div class="result" v-else>
+        <h1>{{ elseText }}</h1>
+    </div>
 
 
   </div>
@@ -31,34 +29,44 @@ export default {
     return{
       api_key:'82fdbb08ed00b8ce22770863b7dbc182',
       query:'karachi',
+      elseText: 'Search for a country/city/territory & ENTER',
       wData:{},
-      coords:{},
-      main:{},
-      sys:{},
-      weather:{}
+      objState: false
     }
   },
   methods:{
      getWeather(){
+     
       fetch(`http://api.openweathermap.org/data/2.5/find?q=${this.query}&units=metric&APPID=${this.api_key}`)
-        .then(response => {
-          return response.json()
-        }).then(this.setResults);  
-    },
-    setResults(result){
-      this.wData = result.list[0];
-      this.coords = this.wData.coord;
-      this.main = this.wData.main;
-      this.sys = this.wData.sys;
-      this.weather = this.wData.weather[0];
+      .then(async response => {
+          const result = await response.json();
+
+          if(!response.ok){
+            const error = (result && result.message) || response.statusText;
+            return Promise.reject(error);
+          }
+
+          this.objState = true;
+          this.wData = result.list[0];
+      })
+      .catch(error => {
+        this.elseText = error;
+        this.objState = false;
+        console.log(error);
+      })
+      
+      
     }
   }
 }
 </script>
 
 <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+
 #app {
-  font-family: monospace, Helvetica, Arial, sans-serif;
+  font-family: 'Fira Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
