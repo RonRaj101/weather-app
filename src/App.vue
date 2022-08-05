@@ -6,6 +6,7 @@
       <input v-model="query" @keypress.enter="getWeather" placeholder="Enter City Name" name="" id="searchbox" required>
     </div>
 
+    
     <div v-if="objState && typeof wData != 'undefined'">
       <div class="result" :class=" parseInt(wData.main.temp) > 20 ? 'hot' : 'cold' " >
         <h1>{{ wData.name }}, {{ wData.sys.country }}</h1>
@@ -14,7 +15,7 @@
       </div>
     </div>
     <div class="result" v-else>
-        <h1>{{ elseText }}</h1>
+        <p>{{ elseText }}</p>
     </div>
 
 
@@ -50,7 +51,7 @@ export default {
           this.wData = result.list[0];
       })
       .catch(error => {
-        this.elseText = error;
+        this.elseText = "Enter a valid location name!";
         this.objState = false;
         console.log(error);
       })
@@ -82,6 +83,7 @@ export default {
 
 #searchbox{
   font-size: 2rem;
+  max-width: 70vw;
   text-align: center;
 }
 
@@ -96,17 +98,22 @@ export default {
   padding:1rem;
   text-align: -webkit-center;
   line-height: 3;
+  max-width: 90vw;
+  transition-property: background;
+  transition-duration: 2s;
+  transition-timing-function: linear;
+  transition-delay: 1s;
 }
 
 .result > *{
   padding:1rem;
 }
 
-.hot{
+.result.hot{
   background: linear-gradient(45deg,crimson,white);
 }
 
-.cold{
+.result.cold{
   background: linear-gradient(135deg, aqua,white);
 }
 
@@ -114,5 +121,6 @@ export default {
     font-size: 4rem;
     width: fit-content;
     padding: 1rem;
+    box-shadow: 5px 5px 10px 0px;
 }
 </style>
